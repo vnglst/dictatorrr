@@ -18,9 +18,9 @@ export default function App() {
     if (window.webkitSpeechRecognition) {
       recognition.current = new window.webkitSpeechRecognition();
       recognition.current.interimResults = true;
-      recognition.current.continuous = true;
       recognition.current.lang = "en-US";
       recognition.current.onresult = processResult;
+      recognition.current.onend = () => setListening(false);
     }
   }, []);
 
