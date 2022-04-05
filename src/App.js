@@ -1,25 +1,58 @@
-import logo from './logo.svg';
-import './App.css';
+import React, { useEffect, useRef, useState } from "react";
 
-function App() {
+export default function App() {
+  const recognition = useRef(null);
+  const [listening, setListening] = useState(false);
+  const [text, setText] = useState("");
+
+  const processResult = (event) => {
+    const transcript = Array.from(event.results)
+      .map((result) => result[0])
+      .map((result) => result.transcript)
+      .join("");
+
+    setText(transcript);
+  };
+
+  useEffect(() => {
+    if (window.webkitSpeechRecognition) {
+      recognition.current = new window.webkitSpeechRecognition();
+      recognition.current.interimResults = true;
+      recognition.current.continuous = true;
+      recognition.current.lang = "en-US";
+      recognition.current.onresult = processResult;
+    }
+  }, []);
+
+  const listen = () => {
+    if (listening) return;
+    setListening(true);
+    recognition.current.start();
+  };
+
+  const stop = () => {
+    if (!listening) return;
+    setListening(false);
+    recognition.current.stop();
+  };
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <nav>
+        {listening ? (
+          <button onClick={stop}>listening...</button>
+        ) : (
+          <button onClick={listen}>DICTATE</button>
+        )}
+      </nav>
+      <main>
+        <textarea
+          value={text}
+          onClick={stop}
+          onChange={(e) => setText(e.target.value)}
+          resize="none"
+        />
+      </main>
+    </>
   );
 }
-
-export default App;
